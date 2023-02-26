@@ -1,0 +1,39 @@
+#!/usr/bin/python3
+import unittest
+import models
+from models.engine.file_storage import FileStorage
+from models.base_model import BaseModel
+from models.user import User
+import os
+
+class TestFileStorage(unittest.TestCase):
+    def setUp(self):
+        self.storage = FileStorage()
+        self.model = BaseModel()
+        self.user = User()
+    def test_all(self):
+        self.assertEqual(type(models.storage.all()), dict)
+    def test_save(self):
+        models.storage.save()
+        self.assertTrue(os.path.exists(self.storage._FileStorage__file_path))
+    def test_new(self):
+        models.storage.new(self.model)
+        self.assertIn("BaseModel." + self.model.id, models.storage.all().keys())
+        self.assertIn(self.model, models.storage.all().values())
+    def test_new_with_args(self):
+        with self.assertRaises(TypeError):
+            models.storage.new(BaseModel(), 1)
+    def test_save_with_args(self):
+        with self.assertRaises(TypeError):
+            models.storage.save(None)
+    def test_reload(self):
+        models.storage.new(self.model)
+        obj = FileStorage._FileStorage__objects
+        self.assertIn("BaseModel." + self.model.id, obj)
+        self.assertIn("User." + self.user.id, obj)
+    def test_reload_with_args(self):
+        with self.assertRaises(TypeError):
+            models.storage.reload(None)
+        
+if __name__=="__main__":
+    unittest.main()
